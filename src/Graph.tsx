@@ -13,10 +13,10 @@ interface GraphProps {
 }
 
 const Graph: React.FC<GraphProps> = ({ nodos, configuracion }) => {
-  const startX = 0;
-  const startY = 0;
-  const endX = 100;
-  const endY = 100;
+  const [startX, setStartX] = useState(0);
+  const [startY, setStartY] = useState(0);
+  const [endX, setEndX] = useState(20);
+  const [endY, setEndY] = useState(20);
   const matrisRef = useRef<cytoscape.Core | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState<any>({});
@@ -30,20 +30,19 @@ const Graph: React.FC<GraphProps> = ({ nodos, configuracion }) => {
     // Ajustar las posiciones para la nueva vista
     const x = (j - startX) * 80;
     const y = (i - startY) * 80;
-    const color = nodo.memoria.vivo === true ? `rgba(0, 255, 0, ${nodo.memoria.edad / configuracion.LIMITE_EDAD})` : 'rgba(200, 200, 200, 1)';
+    const color = (nodo.memoria.energia > ValoresSistema.ENERGIA && nodo.memoria.relaciones.length > 0) ? `rgba(0, 255, 0, ${nodo.memoria.cargas})` : `rgba(200, 200, 200, ${nodo.memoria.cargas})`;
     const label = `${nodo.id} - ${nodo.memoria.edad}`;
     const propiedades = JSON.stringify(nodo);
     const filter = nodo.memoria.relaciones.filter((rel) => {
-      const targetIndex = nodos.find((nodo) => nodo.id === rel.nodoId);
-      if (!targetIndex) {
-        console.log(targetIndex);
-      }
-      return targetIndex ? true : false; // Asegúrate de que el nodo de destino exista
+      const targetIndex = nodos.findIndex((nodo) => nodo.id === rel.nodoId);
+      const targetI = Math.floor(targetIndex / configuracion.COLUMNAS);
+      const targetJ = targetIndex % configuracion.COLUMNAS;
+      return targetIndex !== -1 && targetI >= startY && targetI < endY && targetJ >= startX && targetJ < endX;
     }).map((rel, relIndex) => {
       return {
         data: { id: `${nodo.id}-${rel.nodoId}-${relIndex}`, source: nodo.id, target: rel.nodoId },
-      }
-    })
+      };
+    });
     return [
       { data: { id: nodo.id, label, propiedades }, position: { x, y }, style: { 'background-color': color, 'width': 70, 'height': 70 } },
       ...filter,
@@ -69,7 +68,10 @@ const Graph: React.FC<GraphProps> = ({ nodos, configuracion }) => {
     },
   ];
 
-  const layout2 = {
+  const [currentLayout, setCurrentLayout] = useState('preset');
+
+
+  const layout1 = {
     name: 'cose',
     idealEdgeLength: 100,
     nodeOverlap: 20,
@@ -92,17 +94,23 @@ const Graph: React.FC<GraphProps> = ({ nodos, configuracion }) => {
     name: 'preset',
   };
 
+  const toggleLayout = () => {
+    if (matrisRef.current) {
+      const newLayout = currentLayout === 'preset' ? 'cose' : 'preset';
+      const layoutOptions = newLayout === 'preset' ? layout : layout1;
+      matrisRef.current.layout(layoutOptions).run();
+      setCurrentLayout(newLayout);
+    }
+  };
 
   const handleMatris = (cy: cytoscape.Core) => {
     matrisRef.current = cy;
   };
 
   const handleElementClick = (element: cytoscape.SingularElementArgument) => {
-    console.log(element.data('propiedades'));
     setModalContent(JSON.parse(element.data('propiedades')));
     setShowModal(true);
   };
-
 
   useEffect(() => {
     const updateGraph = (cy: cytoscape.Core) => {
@@ -117,7 +125,7 @@ const Graph: React.FC<GraphProps> = ({ nodos, configuracion }) => {
         const nodoId = node.data('id');
         const nodo = nodos.find((n) => n.id === nodoId);
         if (nodo) {
-          const color = nodo.memoria.vivo === true ? `rgba(0, 255, 0, ${nodo.memoria.edad / ValoresSistema.LIMITE_EDAD})` : 'rgba(200, 200, 200, 1)';
+          const color = (nodo.memoria.energia > ValoresSistema.ENERGIA && nodo.memoria.relaciones.length > 0) ? `rgba(0, 255, 0, ${nodo.memoria.cargas})` : `rgba(200, 200, 200, ${nodo.memoria.cargas})`;
           node.style({ 'background-color': color });
         }
       });
@@ -136,13 +144,18 @@ const Graph: React.FC<GraphProps> = ({ nodos, configuracion }) => {
 
   return (
     <div>
+      <button onClick={toggleLayout}>Cambiar Layout</button>
       <Row>
         <Col sm="12">
+          <label>Start X: <input type="number" value={startX} onChange={e => setStartX(Number(e.target.value))} /></label>
+          <label>Start Y: <input type="number" value={startY} onChange={e => setStartY(Number(e.target.value))} /></label>
+          <label>End X: <input type="number" value={endX} onChange={e => setEndX(Number(e.target.value))} /></label>
+          <label>End Y: <input type="number" value={endY} onChange={e => setEndY(Number(e.target.value))} /></label>
           <CytoscapeComponent
             cy={handleMatris}
             elements={elements}
             style={{ width: '100%', height: '100vh' }}
-            layout={layout}
+            layout={currentLayout === 'preset' ? layout : layout1}
             stylesheet={style}
           />
         </Col>

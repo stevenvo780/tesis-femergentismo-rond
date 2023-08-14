@@ -1,12 +1,19 @@
 export const ValoresSistema = {
-  FILAS: 20,
-  COLUMNAS: 20,
-  PROBABILIDAD_VIDA_INICIAL: 0.5,
-  LIMITE_EDAD: 10,
-  DISTANCIA_RELACION: 3,
-  REDUCCION_CARGA: 0.1,
-  CRECIMIENTO_X: 1, // Número de filas a añadir en cada generación
-  CRECIMIENTO_Y: 1, // Número de columnas a añadir en cada generación
+  FILAS: 100,
+  COLUMNAS: 100,
+  PROBABILIDAD_VIDA_INICIAL: 0.99999,
+  LIMITE_EDAD: 5,
+  REDUCCION_CARGA: 0.01,
+  CRECIMIENTO_X: 2, // Número de filas a añadir en cada generación
+  CRECIMIENTO_Y: 2, // Número de columnas a añadir en cada generación
+  UMBRAL_CARGA: 0.0001,
+  FACTOR_ESTABILIDAD: 0.2,
+  LIMITE_RELACIONAL: 3,
+  DISTANCIA_MAXIMA_RELACION: 1,
+  ENERGIA: 0.1,
+  PROBABILIDAD_TRANSICION: 0.01,
+  FLUCTUACIÓN_MAXIMA: 0.01,
+  PROBABILIDAD_TUNEL: 0.01,
 };
 
 export interface NodoInterface {
@@ -21,17 +28,17 @@ export interface Relacion {
 
 export interface Memoria {
   cargas: number;
-  vivo: boolean;
-  propiedades: number[];
+  energia: number;
   edad: number;
   procesos: Procesos;
   relaciones: Relacion[];
 }
 
 export interface Procesos {
-  materiaEntrante: (nodo: NodoInterface, propiedad: number) => number;
-  cambioDeEstado: (nodo: NodoInterface, propiedad: number) => number;
-  materiaSaliente: (nodos: NodoInterface[], index: number) => number;
   relacionarNodos: (nodo: NodoInterface, vecinos: NodoInterface[]) => void;
-  intercambiarCargas: (nodoA: NodoInterface, nodoB: NodoInterface) => void;
+  intercambiarCargas: (
+    nodoA: NodoInterface,
+    nodoB: NodoInterface,
+    esGrupoCircular: boolean,
+  ) => void;
 }
