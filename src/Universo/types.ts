@@ -59,7 +59,8 @@ export interface Memoria {
 export interface Procesos {
   relacionarNodos: (
     valoresSistema: IValoresSistema,
-    nodos: NodoInterface[],
+    nodo: NodoInterface,
+    vecinos: NodoInterface[],
   ) => void;
   intercambiarCargas: (
     valoresSistema: IValoresSistema,
