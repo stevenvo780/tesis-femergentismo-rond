@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Graph from './Graph';
 import Grid from './Grid';
+import { Entrenador } from './Universo/entrenador';
 import { NodoInterface, ValoresSistema } from './types';
 // Importar los componentes y hooks de react-router-dom
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -9,27 +10,35 @@ function App() {
   const [nodos, setNodos] = useState<NodoInterface[]>([]);
   const [configuracion, setConfiguracion] = useState<typeof ValoresSistema>(ValoresSistema);
   const [pausado, setPausado] = useState(false);
+  const [universoAprendizaje] = useState<Entrenador>(new Entrenador());
 
-  const fetchNodos = () => {
-    fetch('http://localhost:3006/')
-      .then(response => response.json())
-      .then(data => {
-        setNodos(data.nodos)
-        console.log(data.valoresSistema);
-        setConfiguracion(data.valoresSistema);
-      })
-      .catch(console.error);
-  };
+  const obtenerEstadoActualizado = React.useCallback(() => {
+    if (universoAprendizaje) {
+      return universoAprendizaje.universo.obtenerEstadoActualizado();
+    }
+    return null;
+  },[universoAprendizaje])
 
   const togglePausa = () => setPausado(!pausado);
 
   useEffect(() => {
     if (!pausado) {
-      fetchNodos();
-      const interval = setInterval(fetchNodos, 1000);
-      return () => clearInterval(interval);
+      const fetchNodos = () => {
+        const data: any = obtenerEstadoActualizado();
+        console.log(data.nodos[0]);
+        if (data) {
+          // Crear nuevos objetos para nodos y configuración
+          setNodos([...data.nodos]);
+          setConfiguracion({ ...data.valoresSistema });
+        }
+      };
+
+      fetchNodos(); // Llamar a fetchNodos inmediatamente
+      const interval = setInterval(fetchNodos, 1000); // Luego cada segundo
+
+      return () => clearInterval(interval); // Limpiar el intervalo cuando el componente se desmonte
     }
-  }, [pausado]);
+  }, [pausado, obtenerEstadoActualizado, nodos, configuracion]);
 
   return (
     <div className="App">
