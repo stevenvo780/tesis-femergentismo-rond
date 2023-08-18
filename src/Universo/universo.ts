@@ -1,5 +1,6 @@
 import { NodoInterface, IPhysicsRules, PhysicsRules } from './types';
-import { siguienteGeneracion, crearNodo, expandirEspacio } from './fisica';
+import { siguienteGeneracion } from './space';
+import { crearNodo, expandirEspacio } from './time';
 
 
 export class Universo {
