@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { NodoInterface, PhysicsRules } from './Universo/types';
+import { NodoInterface, PhysicsRules, SystemRules } from './Universo/types';
 
 interface GridProps {
   nodos: NodoInterface[];
@@ -24,7 +24,7 @@ const Grid: React.FC<GridProps> = ({ nodos, configuracion }) => {
           const y = Math.floor(index / gridSize) * cellSize;
           let color;
 
-          if (nodo.memoria.energia > 0.9  && nodo.memoria.relaciones.length > PhysicsRules.DISTANCIA_MAXIMA_RELACION) {
+          if (nodo.memoria.energia > 0.9  && nodo.memoria.relaciones.length > SystemRules.OBSERVACION_RELACIONES) {
             color = `rgba(255, 255, 0, ${nodo.memoria.cargas + nodo.memoria.energia})`; // Amarillo
           } else {
             if (nodo.memoria.cargas > 0) {

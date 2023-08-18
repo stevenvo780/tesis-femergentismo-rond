@@ -38,6 +38,11 @@ export enum PhysicsRules {
   PROBABILIDAD_TUNEL = 0.01,
 }
 
+export enum SystemRules {
+  TIEMPO_LIMITE_ESTRUCTURA = 20,
+  OBSERVACION_RELACIONES = 1,
+}
+
 export interface NodoInterface {
   id: string;
   memoria: Memoria;

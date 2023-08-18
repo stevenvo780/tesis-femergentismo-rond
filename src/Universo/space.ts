@@ -1,7 +1,7 @@
 import { NodoInterface, IPhysicsRules } from './types';
 import { calcularEnergia, intercambiarCargas, relacionarNodos } from './time';
 
-export const ruliat = (
+export const cargas = (
   nodo: NodoInterface,
   valoresSistema: IPhysicsRules,
 ) => {
@@ -80,7 +80,7 @@ const procesoDeVidaOMuerte = (nodo: NodoInterface) => {
 };
 
 
-export const siguienteGeneracion = (
+export const nextStep = (
   nodos: NodoInterface[],
   valoresSistema: IPhysicsRules,
 ) => {
@@ -98,7 +98,7 @@ export const siguienteGeneracion = (
         nodo,
         vecinos,
       );
-      ruliat(nodo, valoresSistema);
+      cargas(nodo, valoresSistema);
       procesoDeVidaOMuerte(nodo); // Proceso de vida o muerte
       relacionarNodos(valoresSistema, nodo, vecinos); // Relacionar nodo
       vecinos.forEach((vecino) => {

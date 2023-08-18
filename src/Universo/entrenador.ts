@@ -1,9 +1,9 @@
 import { Universo } from './universo';
-import { NodoInterface, PhysicsRules, IPhysicsRules } from './types';
+import { NodoInterface, PhysicsRules, IPhysicsRules, SystemRules } from './types';
 
 export class Entrenador {
   public universo: Universo;
-  public tiempoLimiteSinEstructuras = 20;
+  public tiempoLimiteSinEstructuras = SystemRules.TIEMPO_LIMITE_ESTRUCTURA;
   public pesos: IPhysicsRules;
   public tasaDeAprendizaje = 0.05;
 
@@ -17,10 +17,10 @@ export class Entrenador {
         obj[key] = PhysicsRules[key];
         return obj;
       }, {} as IPhysicsRules);
-    this.siguienteGeneracionRecursivo();
+    this.nextStepRecursivo();
   }
 
-  private siguienteGeneracionRecursivo() {
+  private nextStepRecursivo() {
     this.universo.next();
     this.universo.tiempo++;
     const visualizar = this.universo.tiempo % this.tiempoLimiteSinEstructuras;
@@ -28,7 +28,7 @@ export class Entrenador {
       this.entrenarPerpetuo()
     }
 
-    setTimeout(() => this.siguienteGeneracionRecursivo(), 0);
+    setTimeout(() => this.nextStepRecursivo(), 0);
   }
 
   private calcularRecompensa(nodos: NodoInterface[]): number {
@@ -106,6 +106,8 @@ export class Entrenador {
 
   private reiniciarUniverso(): void {
     this.universo = new Universo(this.pesos);
+    this.universo.valoresSistema.COLUMNAS = PhysicsRules.COLUMNAS;
+    this.universo.valoresSistema.FILAS = PhysicsRules.FILAS;
   }
 
   private entrenarPerpetuo() {

@@ -1,5 +1,5 @@
 import { NodoInterface, IPhysicsRules, PhysicsRules } from './types';
-import { siguienteGeneracion } from './space';
+import { nextStep } from './space';
 import { crearNodo, expandirEspacio } from './time';
 
 
@@ -63,7 +63,7 @@ export class Universo {
   }
 
   public next() {
-    this.nodos = siguienteGeneracion(this.nodos, this.valoresSistema);
+    this.nodos = nextStep(this.nodos, this.valoresSistema);
     if (this.tiempo % 100 === 0) {
       expandirEspacio(this.nodos, this.valoresSistema);
     }
