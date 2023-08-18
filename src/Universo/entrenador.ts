@@ -1,34 +1,34 @@
-import { Universo } from './ruluat';
-import { NodoInterface, ValoresSistema, IValoresSistema } from './types';
+import { Universo } from './universo';
+import { NodoInterface, PhysicsRules, IPhysicsRules } from './types';
 
 export class Entrenador {
   public universo: Universo;
-  public tiempoSinEstructuras = 0;
-  public tiempoLimiteSinEstructuras = 10;
-  private pesos: IValoresSistema;
-  private tasaDeAprendizaje = 0.05;
+  public tiempoLimiteSinEstructuras = 20;
+  public pesos: IPhysicsRules;
+  public tasaDeAprendizaje = 0.05;
+
+  private tiempoSinEstructuras = 0;
 
   constructor() {
     this.universo = new Universo();
-    this.pesos = Object.keys(ValoresSistema)
+    this.pesos = Object.keys(PhysicsRules)
       .filter((key) => isNaN(Number(key)))
       .reduce((obj: any, key: any) => {
-        obj[key] = ValoresSistema[key];
+        obj[key] = PhysicsRules[key];
         return obj;
-      }, {} as IValoresSistema);
+      }, {} as IPhysicsRules);
     this.siguienteGeneracionRecursivo();
-    this.entrenarPerpetuoRecursivo();
   }
 
   private siguienteGeneracionRecursivo() {
-    this.universo.siguienteGeneracion();
+    this.universo.next();
     this.universo.tiempo++;
-    console.log(this.universo.tiempo);
-    setTimeout(() => this.siguienteGeneracionRecursivo(), 0);
-  }
+    const visualizar = this.universo.tiempo % this.tiempoLimiteSinEstructuras;
+    if (visualizar === 0) {
+      this.entrenarPerpetuo()
+    }
 
-  private entrenarPerpetuoRecursivo() {
-    setTimeout(() => this.entrenarPerpetuo(), 1000);
+    setTimeout(() => this.siguienteGeneracionRecursivo(), 0);
   }
 
   private calcularRecompensa(nodos: NodoInterface[]): number {
@@ -36,14 +36,38 @@ export class Entrenador {
   }
 
   private actualizarPesos(recompensa: number) {
-    const claves = Object.keys(this.pesos) as (keyof IValoresSistema)[];
+    const claves = Object.keys(this.pesos) as (keyof IPhysicsRules)[];
     claves.forEach((clave) => {
-      const ajuste = Math.random() * 0.1 - 0.05;
-      const cambio = this.tasaDeAprendizaje * recompensa * ajuste;
-      if (clave !== 'COLUMNAS' && clave !== 'FILAS') {
-        this.pesos[clave]! += cambio; 
+      if (
+        clave === 'COLUMNAS' ||
+        clave === 'FILAS' ||
+        clave === 'CRECIMIENTO_X' ||
+        clave === 'CRECIMIENTO_Y'
+      ) {
+        return; // No modificar estos valores
       }
+
+      let ajuste = Math.random() * 0.1 - 0.05;
+      if (
+        clave === 'LIMITE_RELACIONAL' ||
+        clave === 'DISTANCIA_MAXIMA_RELACION' ||
+        clave === 'ESPERADO_EMERGENTE' ||
+        clave === 'FACTOR_RELACION'
+      ) {
+        ajuste = Math.round(ajuste);
+      }
+
+      const cambio = this.tasaDeAprendizaje * recompensa * ajuste;
+      this.pesos[clave]! += cambio;
     });
+  }
+
+  public actualizarConfiguracion(
+    tiempoLimiteSinEstructuras: number,
+    tasaDeAprendizaje: number
+  ) {
+    this.tiempoLimiteSinEstructuras = tiempoLimiteSinEstructuras;
+    this.tasaDeAprendizaje = tasaDeAprendizaje;
   }
 
   private detectarEstructuras(nodos: NodoInterface[]): number {
@@ -85,21 +109,17 @@ export class Entrenador {
   }
 
   private entrenarPerpetuo() {
-    const estadoActual = this.universo.obtenerEstadoActualizado();
-    if (this.universo.tiempo >= 100) {
-      this.entrenarPerpetuo();
-    }
-    if (this.hayEstructuras(estadoActual.nodos)) {
+    console.log("Tiempo sin estructura", this.tiempoSinEstructuras);
+    if (this.hayEstructuras(this.universo.nodos)) {
       this.tiempoSinEstructuras = 0;
     } else {
-      console.log(this.tiempoSinEstructuras);
       this.tiempoSinEstructuras++;
       if (this.tiempoSinEstructuras >= this.tiempoLimiteSinEstructuras) {
         this.reiniciarUniverso();
         this.tiempoSinEstructuras = 0;
       }
     }
-    const recompensa = this.calcularRecompensa(estadoActual.nodos);
+    const recompensa = this.calcularRecompensa(this.universo.nodos);
     this.actualizarPesos(recompensa);
   }
 

@@ -1,4 +1,4 @@
-import { NodoInterface, IValoresSistema } from './types';
+import { NodoInterface, IPhysicsRules } from './types';
 
 export const crearNodo = (
   i: number,
@@ -23,7 +23,7 @@ export const crearNodo = (
 
 export const ruliat = (
   nodo: NodoInterface,
-  valoresSistema: IValoresSistema,
+  valoresSistema: IPhysicsRules,
 ) => {
   // Transición espontánea
   if (Math.random() < valoresSistema.PROBABILIDAD_TRANSICION) {
@@ -66,7 +66,7 @@ const calcularEnergia = (nodo: NodoInterface) => {
 };
 
 const esParteDeGrupoCircular = (
-  valoresSistema: IValoresSistema,
+  valoresSistema: IPhysicsRules,
   nodo: NodoInterface,
   vecinos: NodoInterface[],
 ): boolean => {
@@ -78,7 +78,7 @@ const esParteDeGrupoCircular = (
 };
 
 export const intercambiarCargas = (
-  valoresSistema: IValoresSistema,
+  valoresSistema: IPhysicsRules,
   nodoA: NodoInterface,
   nodoB: NodoInterface,
   esGrupoCircular: boolean,
@@ -105,7 +105,7 @@ export const intercambiarCargas = (
 
 const obtenerVecinos = (
   nodos: NodoInterface[],
-  valoresSistema: IValoresSistema,
+  valoresSistema: IPhysicsRules,
   i: number,
   j: number,
 ): NodoInterface[] => {
@@ -139,7 +139,7 @@ const calcularDistancia = (nodoA: NodoInterface, nodoB: NodoInterface) => {
 };
 
 export const relacionarNodos = (
-  valoresSistema: IValoresSistema,
+  valoresSistema: IPhysicsRules,
   nodo: NodoInterface,
   vecinos: NodoInterface[],
 ) => {
@@ -156,13 +156,13 @@ export const relacionarNodos = (
         );
         const distancia = calcularDistancia(nodo, vecino);
         const distanciaMaximaPermitida =
-          valoresSistema.DISTANCIA_MAXIMA_RELACION; // Añadir este valor en ValoresSistema
+          valoresSistema.DISTANCIA_MAXIMA_RELACION; // Añadir este valor en PhysicsRules
         if (distancia > distanciaMaximaPermitida) return; // No relacionar nodos lejanos
 
         const probabilidadRelacion =
           (diferenciaCargas / 2) *
           (1 / distancia) *
-          valoresSistema.FACTOR_RELACION; // Añadir FACTOR_RELACION en ValoresSistema
+          valoresSistema.FACTOR_RELACION; // Añadir FACTOR_RELACION en PhysicsRules
 
         if (
           Math.random() < probabilidadRelacion &&
@@ -201,7 +201,7 @@ export const relacionarNodos = (
 
 export const expandirEspacio = (
   nodos: NodoInterface[],
-  valoresSistema: IValoresSistema,
+  valoresSistema: IPhysicsRules,
 ) => {
   // Añadir filas en la parte inferior
   for (let i = 0; i < valoresSistema.CRECIMIENTO_X; i++) {
@@ -235,6 +235,7 @@ export const expandirEspacio = (
       );
       nodos.push(nodo);
     }
+    //console.log(nodos.length);
   }
 
   // Actualizar los valores del sistema
@@ -246,19 +247,16 @@ export const expandirEspacio = (
 
 export const siguienteGeneracion = (
   nodos: NodoInterface[],
-  valoresSistema: IValoresSistema,
+  valoresSistema: IPhysicsRules,
 ) => {
   const nuevaGeneracion: NodoInterface[] = nodos;
   for (let i = 0; i < valoresSistema.FILAS; i++) {
     for (let j = 0; j < valoresSistema.COLUMNAS; j++) {
       const nodo = nuevaGeneracion[i * valoresSistema.COLUMNAS + j];
-      const vecinos = obtenerVecinos(nodos, valoresSistema, i, j);
+      const vecinos = obtenerVecinos(nuevaGeneracion, valoresSistema, i, j);
       if (!vecinos || !nodo) {
-        console.error('nodos:', valoresSistema);
-        console.log(JSON.stringify(nodos[nodos.length - 1], null, 4));
-        //console.error('nodos:', nodos.length);
-        //console.error('Vecinos no definidos para nodo:', i, j);
-        continue; // Saltar a la siguiente iteración si los vecinos no están definidos
+        console.error('Error al relacionar los nodos:', nodos.length);
+        continue;
       }
       const esGrupoCircular = esParteDeGrupoCircular(
         valoresSistema,

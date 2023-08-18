@@ -1,4 +1,4 @@
-export interface IValoresSistema {
+export interface IPhysicsRules {
   FILAS: number;
   COLUMNAS: number;
   PROBABILIDAD_VIDA_INICIAL: number;
@@ -18,7 +18,7 @@ export interface IValoresSistema {
   PROBABILIDAD_TUNEL: number;
 }
 
-export enum ValoresSistema {
+export enum PhysicsRules {
   FILAS = 100,
   COLUMNAS = 100,
   PROBABILIDAD_VIDA_INICIAL = 0.99999,
@@ -58,12 +58,12 @@ export interface Memoria {
 
 export interface Procesos {
   relacionarNodos: (
-    valoresSistema: IValoresSistema,
+    valoresSistema: IPhysicsRules,
     nodo: NodoInterface,
     vecinos: NodoInterface[],
   ) => void;
   intercambiarCargas: (
-    valoresSistema: IValoresSistema,
+    valoresSistema: IPhysicsRules,
     nodoA: NodoInterface,
     nodoB: NodoInterface,
     esGrupoCircular: boolean,

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
-import { NodoInterface, ValoresSistema } from './types';
+import { NodoInterface, PhysicsRules } from './Universo/types';
 import cytoscape from 'cytoscape'; // Importa cytoscape.js primero
 import cytoscapePopper from 'cytoscape-popper'; // Importa el módulo cytoscape-popper después
 import { Modal, Row, Col } from 'react-bootstrap'; // Registra el módulo cytoscape-popper como una extensión
@@ -9,7 +9,7 @@ cytoscape.use(cytoscapePopper);
 
 interface GraphProps {
   nodos: NodoInterface[];
-  configuracion: typeof ValoresSistema;
+  configuracion: typeof PhysicsRules;
 }
 
 const Graph: React.FC<GraphProps> = ({ nodos, configuracion }) => {
@@ -30,7 +30,7 @@ const Graph: React.FC<GraphProps> = ({ nodos, configuracion }) => {
     // Ajustar las posiciones para la nueva vista
     const x = (j - startX) * 80;
     const y = (i - startY) * 80;
-    const color = (nodo.memoria.energia > ValoresSistema.ENERGIA && nodo.memoria.relaciones.length > 0) ? `rgba(0, 255, 0, ${nodo.memoria.cargas})` : `rgba(200, 200, 200, ${nodo.memoria.cargas})`;
+    const color = (nodo.memoria.energia > PhysicsRules.ENERGIA && nodo.memoria.relaciones.length > 0) ? `rgba(0, 255, 0, ${nodo.memoria.cargas})` : `rgba(200, 200, 200, ${nodo.memoria.cargas})`;
     const label = `${nodo.id} - ${nodo.memoria.edad}`;
     const propiedades = JSON.stringify(nodo);
     const filter = nodo.memoria.relaciones.filter((rel) => {
@@ -125,7 +125,7 @@ const Graph: React.FC<GraphProps> = ({ nodos, configuracion }) => {
         const nodoId = node.data('id');
         const nodo = nodos.find((n) => n.id === nodoId);
         if (nodo) {
-          const color = (nodo.memoria.energia > ValoresSistema.ENERGIA && nodo.memoria.relaciones.length > 0) ? `rgba(0, 255, 0, ${nodo.memoria.cargas})` : `rgba(200, 200, 200, ${nodo.memoria.cargas})`;
+          const color = (nodo.memoria.energia > PhysicsRules.ENERGIA && nodo.memoria.relaciones.length > 0) ? `rgba(0, 255, 0, ${nodo.memoria.cargas})` : `rgba(200, 200, 200, ${nodo.memoria.cargas})`;
           node.style({ 'background-color': color });
         }
       });

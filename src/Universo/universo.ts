@@ -1,39 +1,49 @@
-import { NodoInterface, IValoresSistema, ValoresSistema } from './types';
+import { NodoInterface, IPhysicsRules, PhysicsRules } from './types';
 import { siguienteGeneracion, crearNodo, expandirEspacio } from './fisica';
 
 
 export class Universo {
   public nodos: NodoInterface[] = [];
   public tiempo = 0;
-  public valoresSistema: IValoresSistema;
+  public valoresSistema: IPhysicsRules;
+  public id: string;
 
-  constructor(valoresSistema?: IValoresSistema) {
+  constructor(valoresSistema?: IPhysicsRules) {
     if (valoresSistema) {
-      console.log(valoresSistema);
       this.valoresSistema = valoresSistema;
     } else {
-      this.valoresSistema = Object.keys(ValoresSistema)
+      this.valoresSistema = Object.keys(PhysicsRules)
         .filter((key) => isNaN(Number(key)))
         .reduce((obj: any, key: any) => {
-          obj[key] = ValoresSistema[key];
+          obj[key] = PhysicsRules[key];
           return obj;
-        }, {} as IValoresSistema);
+        }, {} as IPhysicsRules);
     }
+    this.nodos = [];
+    this.id = this.generarId();
     this.determinacionesDelSistema();
   }
 
-  public obtenerEstadoActualizado(): {
-    nodos: NodoInterface[];
-    valoresSistema: IValoresSistema;
-  } {
-    return {
-      nodos: this.nodos,
-      valoresSistema: this.valoresSistema,
-    };
+  private generarId(): string {
+    return (
+      new Date().toISOString() +
+      '-' +
+      this.valoresSistema.FILAS +
+      '-' +
+      this.valoresSistema.COLUMNAS +
+      '-' +
+      Math.random().toString(36).substr(2, 9)
+    );
   }
 
-  public getValores(): any {
-    return this.valoresSistema;
+  private deserializarId(id: string): { fecha: string; filas: number; columnas: number; randomString: string } {
+    const partes = id.split('-');
+    return {
+      fecha: partes[0],
+      filas: parseInt(partes[1], 10),
+      columnas: parseInt(partes[2], 10),
+      randomString: partes[3],
+    };
   }
 
   public determinacionesDelSistema() {
@@ -51,7 +61,7 @@ export class Universo {
     }
   }
 
-  public siguienteGeneracion() {
+  public next() {
     this.nodos = siguienteGeneracion(this.nodos, this.valoresSistema);
     if (this.tiempo % 100 === 0) {
       expandirEspacio(this.nodos, this.valoresSistema);
